@@ -1,0 +1,61 @@
+import SwiftUI
+
+struct ContentView: View {
+    
+    @State private var startStroke: CGFloat = 0.0
+    @State private var endStroke: CGFloat = 0.0
+    @State private var timer: Timer?
+    @State private var length: CGFloat = 0.1
+    
+    var body: some View {
+        ZStack {
+            
+            RoundedRectangle(cornerRadius: 15)
+                .stroke(lineWidth: 8)
+                .frame(width: 200, height: 150)
+                .foregroundColor(Color(.systemGray5))
+            
+            RoundedRectangle(cornerRadius: 15)
+                .trim(from: startStroke, to: endStroke)
+                .stroke(style: StrokeStyle(lineWidth: 8, lineCap: .round, lineJoin: .round))
+                .fill(Color.yellow)
+                .frame(width: 200, height: 150)
+
+        }
+        .onAppear {
+            timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { _ in
+                
+                if endStroke <= length {
+                    withAnimation(.linear(duration: 0.15)) {
+                        endStroke += 0.05
+                    }
+                    return
+                }
+                
+                if endStroke <= 1 && startStroke <= 1 - length {
+                    withAnimation(.linear(duration: 0.15)) {
+                        endStroke += 0.05
+                        startStroke += 0.05
+                    }
+                    return
+                }
+                
+                if startStroke <= 1 {
+                    
+                    withAnimation(.linear) {
+                        startStroke += 0.05
+                    }
+                    return
+                }
+                
+                // reset
+                startStroke = 0.0
+                endStroke = 0.0
+            }
+        }
+    }
+}
+
+#Preview {
+    ContentView()
+}
