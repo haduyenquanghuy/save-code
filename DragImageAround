@@ -1,0 +1,39 @@
+struct WindowView: View {
+    @State private var translation = CGSize.zero
+    @State private var lastTranslation = CGSize.zero
+    
+    var body: some View {
+        VStack {
+            // None gesture on the child view
+            Color.red
+                .frame(height: 100)
+            Spacer()
+        }
+        .background(.blue)
+        .frame(width: 300, height: 300)
+        .cornerRadius(10)
+        // Added content shape matching child view
+        .contentShape(
+            Rectangle()
+                .size(width: 300, height: 100)
+        )
+        .offset(
+            x: lastTranslation.width + translation.width,
+            y: lastTranslation.height + translation.height
+        )
+        // Moved gesture to the parent view
+        .gesture(dragGesture)
+    }
+    
+    var dragGesture: some Gesture {
+        DragGesture()
+            .onChanged { value in
+                translation = value.translation
+            }
+            .onEnded { value in
+                lastTranslation.width += value.translation.width
+                lastTranslation.height += value.translation.height
+                translation = .zero
+            }
+    }
+}
