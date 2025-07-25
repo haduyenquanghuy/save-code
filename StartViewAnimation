@@ -1,0 +1,127 @@
+//
+//  ContentView.swift
+//  StartViewAnimation
+//
+//  Created by Ha Duyen Quang Huy on 25/7/25.
+//
+
+import SwiftUI
+
+struct ContentView: View {
+    
+    let startNum: Int = 5
+    @State private var selected: [Bool] = Array(repeating: true, count: 5)
+    
+    var selectedStart: Int {
+        selected.filter { $0 }.count
+    }
+    
+    var commentStr: String? {
+        switch selectedStart {
+            case 1:
+                return "vô nghĩa"
+            case 2:
+                return "Không đúng"
+            case 3:
+                return "Tạm được"
+            case 4:
+                return "Tốt"
+            case 5:
+                return "Rất tốt"
+            default:
+                return nil
+        }
+    }
+    
+    
+    var body: some View {
+        VStack(spacing: 12) {
+            HStack {
+                ForEach(0..<5, id: \.self) { val in
+                    StarAnimationView(isSelected: $selected[val])
+                        .onTapGesture {
+                            
+                            withAnimation(.linear(duration: 0.24)) {
+                                for i in 0..<startNum {
+                                    selected[i] = i <= val
+                                }
+                            }
+                        }
+                }
+            }
+            
+            if let text = commentStr {
+                HStack(spacing: 8) {
+                    Text("Câu trả lời")
+                    
+                    Text(text)
+                        .fontWeight(.semibold)
+                        .transition(.scale)
+                        .id(commentStr)
+                }
+                .frame(height: 44)
+            }
+        }
+        .padding()
+    }
+}
+
+struct StarAnimationView: View {
+    
+    @Binding var isSelected: Bool
+    
+    var body: some View {
+        ZStack {
+            if isSelected {
+                Image(systemName: "star.fill")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 28, height: 28)
+                    .foregroundStyle(.yellow)
+                    .transition(.flip)
+            }
+            else {
+                Image(systemName: "star.fill")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 28, height: 28)
+                    .foregroundStyle(.gray)
+                    .transition(.reverseFlip)
+            }
+        }
+        .frame(width: 24, height: 24)
+        .clipped()
+    }
+}
+
+#Preview {
+    ContentView()
+}
+
+struct FlipTransition: ViewModifier {
+    var progress: CGFloat = 0
+    
+    var animatableData: CGFloat {
+        get { progress }
+        set { progress = newValue }
+    }
+    
+    func body(content: Content) -> some View {
+        content
+            .opacity(progress < 0 ? (-progress < 0.5 ? 1 : 0) : (progress < 0.5 ? 1 : 0))
+            .rotation3DEffect(
+                .init(degrees: progress * 180),
+                                      axis: (x: 0.0, y: 1.0, z: 0.0)
+            )
+    }
+}
+
+extension AnyTransition {
+    static let flip: AnyTransition = .modifier(
+        active: FlipTransition(progress: 1), identity: FlipTransition()
+    )
+    
+    static let reverseFlip: AnyTransition = .modifier(
+        active: FlipTransition(progress: -1), identity: FlipTransition()
+    )
+}
